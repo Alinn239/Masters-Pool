@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>The Masters Pool — 2025</title>
+<title>The Masters Pool — 2026</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -171,6 +171,15 @@
     transition: background 0.2s, border-color 0.2s;
   }
 
+  .player-row.eliminated {
+    opacity: 0.4;
+    border-color: rgba(201,168,76,0.05);
+  }
+  .player-row.eliminated:hover { opacity: 0.55; }
+  .player-row.eliminated .place { color: rgba(250,246,238,0.4); }
+  .player-row.eliminated .player-name { color: rgba(250,246,238,0.5); }
+  .player-row.eliminated .score { color: rgba(250,246,238,0.4) !important; }
+
   .player-row:hover {
     background: rgba(250,246,238,0.07);
     border-color: rgba(201,168,76,0.25);
@@ -295,7 +304,7 @@
 <div class="page">
 
   <div class="header">
-    <div class="header-badge">Augusta National &middot; April 2025</div>
+    <div class="header-badge">Augusta National &middot; April 2026</div>
     <h1>The <span>Masters</span></h1>
     <p class="header-sub">Pool Scoreboard</p>
     <div class="divider"></div>
@@ -324,7 +333,7 @@
   </div>
 
   <div class="footer">
-    Auto-refreshes every 60 seconds &nbsp;&middot;&nbsp; <strong>The Masters Pool 2025</strong>
+    Auto-refreshes every 60 seconds &nbsp;&middot;&nbsp; <strong>The Masters Pool 2026</strong>
   </div>
 
 </div>
@@ -399,8 +408,9 @@ function render(rows) {
     var golferNames = [row[4], row[5], row[6], row[7], row[8]];
     var golfers = golferNames.map(function(g) { return g || '-'; });
     var isFirst = /^1/.test(place.trim());
+    var isElim = place.trim() === '—' || place.trim() === '-' || place.trim() === '';
     var div = document.createElement('div');
-    div.className = 'player-row' + (isFirst ? ' first-place' : '');
+    div.className = 'player-row' + (isFirst ? ' first-place' : '') + (isElim ? ' eliminated' : '');
     div.style.animationDelay = (i * 0.07) + 's';
     var sc = scoreClass(score);
     var trophy = '';
