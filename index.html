@@ -459,6 +459,11 @@ function fetchData() {
       var rows = parseCSV(text);
       if (!rows.length) throw new Error('No data');
       render(rows);
+      var hasOutlook = rows.some(function(r) { return r[3] && r[3].trim() !== ''; });
+      var ohdr = document.querySelector('.outlook-header');
+      var ocols = document.querySelectorAll('.outlook');
+      if (ohdr) ohdr.style.display = hasOutlook ? '' : 'none';
+      ocols.forEach(function(el) { el.style.display = hasOutlook ? '' : 'none'; });
       setStatus('active', 'Live');
       setUpdated();
     })
