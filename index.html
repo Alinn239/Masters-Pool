@@ -365,8 +365,25 @@ var lastGoodRows = null;
 
 var CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ43n1MzwpbzB0rGXhiSqf9q7kLaSRjjpCoA3Xs_vFgEvI7JLaoqkZ50_LT9bzrmLCzf1WUSw5LzIFl/pub?gid=1968497575&single=true&output=csv';
 
+function parseLine(line) {
+  var cols = [], cur = '', inQ = false;
+  for (var i = 0; i < line.length; i++) {
+    var c = line[i];
+    if (c === '"') { inQ = !inQ; }
+    else if (c === ',' && !inQ) { cols.push(cur.trim()); cur = ''; }
+    else { cur += c; }
+  }
+  cols.push(cur.trim());
+  return cols;
+}
+
+var projectedCut = null;
+
 function parseCSV(text) {
   var lines = text.trim().split('\n');
+  var firstRow = parseLine(lines[0]);
+  var cutVal = parseFloat(firstRow[0]);
+  projectedCut = isNaN(cutVal) ? null : cutVal;
   var startIdx = 0;
   for (var i = 0; i < lines.length; i++) {
     var l = lines[i].toLowerCase();
@@ -374,15 +391,7 @@ function parseCSV(text) {
     if (l.indexOf('place') === 0) { startIdx = i + 1; break; }
   }
   return lines.slice(startIdx).map(function(line) {
-    var cols = [], cur = '', inQ = false;
-    for (var i = 0; i < line.length; i++) {
-      var c = line[i];
-      if (c === '"') { inQ = !inQ; }
-      else if (c === ',' && !inQ) { cols.push(cur.trim()); cur = ''; }
-      else { cur += c; }
-    }
-    cols.push(cur.trim());
-    return cols;
+    return parseLine(line);
   }).filter(function(r) { return r[1] && r[1].trim(); });
 }
 
@@ -442,11 +451,29 @@ function render(rows) {
     var sc = scoreClass(score);
     var trophy = '';
 
-    var mobilePicks = golferNames.map(function(g) {
+    var golferScores = [row[10], row[11], row[12], row[13], row[14]].map(function(s) {
+      var n = parseFloat(s);
+      return isNaN(n) ? null : n;
+    });
+
+    var mobilePicks = golferNames.map(function(g, idx) {
       if (!g || g === '-') return '';
       var parts = g.trim().split(' ');
       var last = parts[parts.length - 1];
-      return '<span class="m-pick">' + last + '</span>';
+      var gs = golferScores[idx];
+      var pillStyle = '';
+      if (projectedCut !== null && gs !== null) {
+        if (gs >= 999) {
+          pillStyle = 'background:rgba(180,60,60,0.25);color:#e07070;border-color:rgba(180,60,60,0.3);';
+        } else if (gs > projectedCut) {
+          pillStyle = 'background:rgba(180,60,60,0.25);color:#e07070;border-color:rgba(180,60,60,0.3);';
+        } else if (gs === projectedCut) {
+          pillStyle = 'background:rgba(200,160,40,0.25);color:#e8c97a;border-color:rgba(200,160,40,0.3);';
+        } else {
+          pillStyle = 'background:rgba(60,160,90,0.2);color:#6ee090;border-color:rgba(60,160,90,0.25);';
+        }
+      }
+      return '<span class="m-pick" style="' + pillStyle + '">' + last + '</span>';
     }).filter(Boolean).join('');
 
     div.innerHTML =
