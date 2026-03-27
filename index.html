@@ -110,12 +110,18 @@
     display: none;
     align-items: center;
     justify-content: center;
-    gap: 14px;
-    margin-top: 4px;
+    gap: 10px;
+    margin-top: 8px;
     flex-wrap: wrap;
+    text-align: center;
   }
-  .cut-legend.visible { display: flex; }
-  @media(max-width:700px){ .cut-legend { display: none !important; } }
+  .cut-legend.visible {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 10px !important;
+  }
   .cut-badge {
     font-size: 12px;
     color: rgba(250,246,238,0.4);
@@ -131,6 +137,8 @@
     border-radius: 10px;
     border: 1px solid;
   }
+  .mobile-only { display: none; }
+  @media(max-width:700px){ .mobile-only { display: inline-block; } }
   .legend-pill.safe   { background: rgba(60,160,90,0.2);   color: #6ee090; border-color: rgba(60,160,90,0.25); }
   .legend-pill.bubble { background: rgba(200,160,40,0.25); color: #e8c97a; border-color: rgba(200,160,40,0.3); }
   .legend-pill.danger { background: rgba(180,60,60,0.25);  color: #e07070; border-color: rgba(180,60,60,0.3); }
@@ -362,6 +370,9 @@
     <div class="divider"></div>
     <div class="cut-legend" id="cut-legend">
       <span class="cut-badge" id="cut-badge">Projected cut: E</span>
+      <span class="legend-pill safe mobile-only">Safe</span>
+      <span class="legend-pill bubble mobile-only">Bubble</span>
+      <span class="legend-pill danger mobile-only">In danger</span>
     </div>
   </div>
 
@@ -414,7 +425,8 @@ var projectedCut = null;
 function parseCSV(text) {
   var lines = text.trim().split('\n');
   var firstRow = parseLine(lines[0]);
-  var cutVal = parseFloat(firstRow[0]);
+  var rawCut = firstRow[0].replace(/["\'\s]/g, '');
+  var cutVal = parseFloat(rawCut);
   projectedCut = isNaN(cutVal) ? null : cutVal;
   var startIdx = 0;
   for (var i = 0; i < lines.length; i++) {
