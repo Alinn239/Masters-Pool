@@ -177,6 +177,21 @@
     letter-spacing: 0.08em;
     margin-top: 2px;
   }
+  .defending-champ {
+    font-family: 'Crimson Pro', serif;
+    font-style: italic;
+    font-size: 14px;
+    color: rgba(201,168,76,0.5);
+    letter-spacing: 0.06em;
+    margin-top: 14px;
+    text-align: center;
+  }
+  .defending-champ strong {
+    color: rgba(201,168,76,0.85);
+    font-style: normal;
+    font-weight: 400;
+  }
+
   .day-badge-rule {
     width: 120px;
     height: 1px;
@@ -605,6 +620,9 @@ function fetchData() {
         lastGoodRows = rows;
       }
       render(rows);
+      var champRow = rows.find(function(r) { return (r[9] || '').trim() === '2025'; });
+      var defendingChamp = champRow ? (champRow[1] || '').trim() : null;
+      renderDayBadge(defendingChamp);
       var hasOutlook = rows.some(function(r) { return r[3] && r[3].trim() !== ''; });
       var legend = document.getElementById('cut-legend');
       var cutBadge = document.getElementById('cut-badge');
@@ -629,7 +647,7 @@ function fetchData() {
     });
 }
 
-function renderDayBadge() {
+function renderDayBadge(defendingChamp) {
   var container = document.getElementById('day-badge-container');
   var day = new Date().getDay(); // 0=Sun, 4=Thu, 5=Fri, 6=Sat
 
@@ -656,6 +674,11 @@ function renderDayBadge() {
     return;
   }
 
+  var champLine = '';
+  if (day === 4 && defendingChamp) {
+    champLine = '<div class="defending-champ">Defending champion &nbsp;&middot;&nbsp; <strong>' + defendingChamp + '</strong></div>';
+  }
+
   container.innerHTML =
     '<div class="day-badge">' +
       '<div class="day-badge-label">' + label + '</div>' +
@@ -663,7 +686,8 @@ function renderDayBadge() {
       '<span class="day-badge-main">' + main + '</span>' +
       '<div class="day-badge-rule"></div>' +
       (sub ? '<div class="day-badge-sub">' + sub + '</div>' : '') +
-    '</div>';
+    '</div>' +
+    champLine;
 }
 
 renderDayBadge();
