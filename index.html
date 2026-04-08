@@ -416,12 +416,22 @@
 
   .payout-box-wrap { text-align: center; margin-bottom: 28px; }
   .payout-box {
-    display: inline-flex;
-    align-items: stretch;
+    display: inline-block;
     border: 1px solid rgba(201,168,76,0.22);
     border-radius: 5px;
     overflow: hidden;
   }
+  .payout-box-header {
+    font-family: 'Crimson Pro', serif;
+    font-size: 9px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: rgba(201,168,76,0.4);
+    text-align: center;
+    padding: 6px 20px 5px;
+    border-bottom: 1px solid rgba(201,168,76,0.15);
+  }
+  .payout-box-rows { display: flex; align-items: stretch; }
   .payout-item {
     display: flex;
     flex-direction: column;
@@ -478,6 +488,8 @@
 
   <div class="payout-box-wrap">
     <div class="payout-box" id="payout-box">
+      <div class="payout-box-header">Prize Pool</div>
+      <div class="payout-box-rows">
       <div class="payout-item">
         <div class="payout-item-place">1st</div>
         <div class="payout-item-amt" id="payout-1">—</div>
@@ -492,6 +504,7 @@
         <div class="payout-item-place">3rd</div>
         <div class="payout-item-amt third" id="payout-3">—</div>
         <div class="payout-item-pct">10%</div>
+      </div>
       </div>
     </div>
   </div>
