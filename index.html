@@ -413,6 +413,46 @@
     .mobile-picks { display:block; font-size:11px; color:rgba(250,246,238,0.45); margin-top:2px; }
     .row-main { min-height:56px; }
   }
+
+  .payout-box-wrap { text-align: center; margin-bottom: 28px; }
+  .payout-box {
+    display: inline-flex;
+    align-items: stretch;
+    border: 1px solid rgba(201,168,76,0.22);
+    border-radius: 5px;
+    overflow: hidden;
+  }
+  .payout-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 16px;
+    gap: 1px;
+    border-right: 1px solid rgba(201,168,76,0.15);
+  }
+  .payout-item:last-child { border-right: none; }
+  .payout-item-place {
+    font-size: 9px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: rgba(201,168,76,0.45);
+    font-family: 'Crimson Pro', serif;
+  }
+  .payout-item-amt {
+    font-family: 'Playfair Display', serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: #c9a84c;
+    line-height: 1.2;
+  }
+  .payout-item-amt.second { color: rgba(201,168,76,0.7); font-size: 13px; }
+  .payout-item-amt.third  { color: rgba(201,168,76,0.5); font-size: 12px; }
+  .payout-item-pct {
+    font-size: 9px;
+    color: rgba(201,168,76,0.3);
+    font-family: 'Crimson Pro', serif;
+  }
 </style>
 </head>
 <body>
@@ -434,6 +474,26 @@
   <div class="live-bar">
     <div class="live-dot loading" id="live-status">Fetching scores</div>
     <div class="last-updated" id="last-updated"></div>
+  </div>
+
+  <div class="payout-box-wrap">
+    <div class="payout-box" id="payout-box">
+      <div class="payout-item">
+        <div class="payout-item-place">1st</div>
+        <div class="payout-item-amt" id="payout-1">—</div>
+        <div class="payout-item-pct">65%</div>
+      </div>
+      <div class="payout-item">
+        <div class="payout-item-place">2nd</div>
+        <div class="payout-item-amt second" id="payout-2">—</div>
+        <div class="payout-item-pct">25%</div>
+      </div>
+      <div class="payout-item">
+        <div class="payout-item-place">3rd</div>
+        <div class="payout-item-amt third" id="payout-3">—</div>
+        <div class="payout-item-pct">10%</div>
+      </div>
+    </div>
   </div>
 
   <div class="scoreboard">
@@ -620,7 +680,14 @@ function fetchData() {
         lastGoodRows = rows;
       }
       render(rows);
-      var champRow = rows.find(function(r) { return (r[9] || '').trim() === '2025'; });
+      var entryFee = 50;
+  var totalPot = rows.length * entryFee;
+  var fmt = function(n) { return '$' + Math.round(n).toLocaleString(); };
+  document.getElementById('payout-1').textContent = fmt(totalPot * 0.65);
+  document.getElementById('payout-2').textContent = fmt(totalPot * 0.25);
+  document.getElementById('payout-3').textContent = fmt(totalPot * 0.10);
+
+  var champRow = rows.find(function(r) { return (r[9] || '').trim() === '2025'; });
       var defendingChamp = champRow ? (champRow[1] || '').trim() : null;
       renderDayBadge(defendingChamp);
       var hasOutlook = rows.some(function(r) { return r[3] && r[3].trim() !== ''; });
