@@ -393,15 +393,35 @@
 
   .mobile-picks { display: none; }
   .m-pick {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
     font-size: 10px;
-    padding: 1px 6px;
+    padding: 2px 7px;
     border-radius: 10px;
     margin: 2px 2px 0 0;
     background: rgba(250,246,238,0.08);
-    color: rgba(250,246,238,0.5);
+    color: rgba(250,246,238,0.55);
     border: 1px solid rgba(250,246,238,0.1);
   }
+  .m-pick-score { font-family: 'Playfair Display', serif; font-size: 10px; font-weight: 700; }
+  .m-pick-score.under { color: #6ee090; }
+  .m-pick-score.over  { color: #e07070; }
+  .m-pick-score.even  { color: rgba(250,246,238,0.45); }
+
+  .player-row { cursor: pointer; }
+  .row-chevron { display: inline-block; font-size: 9px; color: rgba(201,168,76,0.4); margin-left: 6px; transition: transform 0.2s; vertical-align: middle; }
+  .player-row.expanded .row-chevron { transform: rotate(180deg); }
+
+  .golfer-expand { display: none; border-top: 1px solid rgba(201,168,76,0.1); padding: 10px 24px 12px; }
+  .player-row.expanded .golfer-expand { display: block; }
+  .golfer-expand-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+  .ge-card { text-align: center; background: rgba(250,246,238,0.04); border: 1px solid rgba(201,168,76,0.1); border-radius: 4px; padding: 6px 4px; }
+  .ge-name { font-size: 11px; color: rgba(250,246,238,0.45); margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ge-score { font-family: 'Playfair Display', serif; font-size: 16px; font-weight: 700; }
+  .ge-score.under { color: #6ee090; }
+  .ge-score.over  { color: #e07070; }
+  .ge-score.even  { color: rgba(250,246,238,0.55); }
 
   @media(max-width:700px){
     .col-headers,.row-main{ grid-template-columns: 44px 1fr 60px; }
@@ -409,9 +429,11 @@
     .col-headers span:nth-child(n+4){ display:none; }
     .player-name{ font-size:15px; }
     .place,.score{ font-size:18px; }
-    .player-row{ padding:0 16px; }
+    .player-row{ padding:0 16px; cursor:default; }
     .mobile-picks { display:block; font-size:11px; color:rgba(250,246,238,0.45); margin-top:2px; }
     .row-main { min-height:56px; }
+    .row-chevron { display: none; }
+    .golfer-expand { display: none !important; }
   }
 
   .payout-box-wrap { text-align: center; margin-bottom: 28px; }
@@ -634,6 +656,7 @@ function render(rows) {
       var last = parts[parts.length - 1];
       var gs = golferScores[idx];
       var pillStyle = '';
+      var scoreHtml = '';
       if (projectedCut !== null && gs !== null) {
         if (gs >= 999) {
           pillStyle = 'background:rgba(180,60,60,0.25);color:#e07070;border-color:rgba(180,60,60,0.3);';
@@ -645,17 +668,42 @@ function render(rows) {
           pillStyle = 'background:rgba(60,160,90,0.2);color:#6ee090;border-color:rgba(60,160,90,0.25);';
         }
       }
-      return '<span class="m-pick" style="' + pillStyle + '">' + last + '</span>';
+      if (gs !== null) {
+        var sc = gs < 0 ? 'under' : gs > 0 ? 'over' : 'even';
+        var sl = gs === 0 ? 'E' : (gs > 0 ? '+' + gs : '' + gs);
+        if (gs >= 999) { sc = 'over'; sl = 'CUT'; }
+        scoreHtml = '<span class="m-pick-score ' + sc + '">' + sl + '</span>';
+      }
+      return '<span class="m-pick" style="' + pillStyle + '">' + last + scoreHtml + '</span>';
+    }).filter(Boolean).join('');
+
+    var expandCards = golferNames.map(function(g, idx) {
+      if (!g || g === '-') return '';
+      var gs = golferScores[idx];
+      var sc = 'even', sl = 'E';
+      if (gs !== null) {
+        if (gs >= 999) { sc = 'over'; sl = 'CUT'; }
+        else if (gs < 0) { sc = 'under'; sl = '' + gs; }
+        else if (gs > 0) { sc = 'over'; sl = '+' + gs; }
+      }
+      return '<div class="ge-card"><div class="ge-name">' + g + '</div><div class="ge-score ' + sc + '">' + sl + '</div></div>';
     }).filter(Boolean).join('');
 
     div.innerHTML =
       '<div class="row-main">' +
         '<div class="place">' + place + '</div>' +
-        '<div class="player-name">' + trophy + name + (champYear ? '<span class="champ-year">' + champYear + '</span>' : '') + '<div class="mobile-picks">' + mobilePicks + '</div></div>' +
+        '<div class="player-name">' + trophy + name + (champYear ? '<span class="champ-year">' + champYear + '</span>' : '') + '<span class="row-chevron">&#9660;</span><div class="mobile-picks">' + mobilePicks + '</div></div>' +
         '<div class="score ' + sc + '">' + formatScore(score, isElim) + '</div>' +
         '<div class="outlook">' + outlook + '</div>' +
         golfers.map(function(g) { return '<div class="golfer-cell">' + g + '</div>'; }).join('') +
-      '</div>';
+      '</div>' +
+      '<div class="golfer-expand"><div class="golfer-expand-grid">' + expandCards + '</div></div>';
+
+    div.addEventListener('click', function() {
+      if (window.innerWidth > 700) {
+        div.classList.toggle('expanded');
+      }
+    });
     container.appendChild(div);
   });
 }
